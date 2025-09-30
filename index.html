@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacity Needs Assessment Questionnaire</title>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 0;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .page-break {
+                page-break-after: always;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #34495e;
+            background-color: #ecf0f1;
+            padding: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .header-info {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 3px solid #3498db;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            margin: 10px 0;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .likert-item {
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+            margin: 5px;
+        }
+
+        .likert-item input {
+            margin: 0 auto;
+            display: block;
+        }
+
+        .likert-item label {
+            display: block;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .submit-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .print-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .print-btn:hover {
+            background-color: #229954;
+        }
+
+        .sub-question {
+            margin-left: 30px;
+            margin-top: 10px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+    </style>
+    <script>
+        function downloadAsJSON(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = {
+                timestamp: new Date().toISOString(),
+                submission_date: new Date().toLocaleString()
+            };
+
+            // Collect all form data
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+
+            // Create JSON file
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `capacity_assessment_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Form data downloaded as JSON! You can also download as CSV.');
+        }
+
+        function downloadAsCSV() {
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+
+            let csv = 'Field,Value\n';
+            csv += `Submission Date,${new Date().toLocaleString()}\n`;
+
+            for (let [key, value] of formData.entries()) {
+                // Escape commas and quotes in values
+                const escapedValue = String(value).replace(/"/g, '""');
+                csv += `"${key}","${escapedValue}"\n`;
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `capacity_assessment_${Date.now()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Form data downloaded as CSV!');
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <button class="print-btn no-print" onclick="window.print()">Print/Save as PDF</button>
+
+        <h1>Capacity Needs Assessment Questionnaire</h1>
+        <h3>Cross-Border DRM & Early Warning Systems</h3>
+
+        <div style="background: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin-bottom: 20px;">
+            <strong>💾 VERSION 3: Local Download (JSON/CSV)</strong><br>
+            Form responses will be downloaded to your device as JSON or CSV file.
+        </div>
+
+        <form onsubmit="downloadAsJSON(event)">
+
+            <div class="header-info">
+                <p><strong>Purpose:</strong> This questionnaire aims to assess the existing capacities, gaps, and
+                    training needs of stakeholders in the Karamoja, Mandera, and Moyale clusters. The responses will
+                    inform the design of the upcoming training for the Cross-Border Technical Working Group on Disaster
+                    Risk Management and Early Warning Systems.</p>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Name:</label>
+                        <input type="text" name="name">
+                    </div>
+                    <div class="form-col">
+                        <label>Organization:</label>
+                        <input type="text" name="organization">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Position/Title:</label>
+                        <input type="text" name="position">
+                    </div>
+                    <div class="form-col">
+                        <label>Cluster:</label>
+                        <select name="cluster">
+                            <option value="">Select Cluster</option>
+                            <option value="karamoja">Karamoja</option>
+                            <option value="mandera">Mandera</option>
+                            <option value="moyale">Moyale</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Email:</label>
+                        <input type="text" name="email">
+                    </div>
+                    <div class="form-col">
+                        <label>Phone:</label>
+                        <input type="text" name="phone">
+                    </div>
+                </div>
+            </div>
+
+            <h2>Section 1: Institutional and Organizational Capacity</h2>
+
+            <div class="question">
+                <div class="question-number">1. Organization Type and DRM Role</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" name="org_gov"> Government Agency</div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_un"> UN Agency</div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_ingo"> International NGO</div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_local"> Local NGO/CBO</div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_academic"> Academic/Research Institution
+                    </div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_private"> Private Sector</div>
+                    <div class="checkbox-item"><input type="checkbox" name="org_other"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+                <label>Describe your role in DRM/EWS:</label>
+                <textarea name="drm_role"></textarea>
+            </div>
+
+            <div class="question">
+                <div class="question-number">2. Existing DRM/EWS Structures</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" name="struct_national"> National DRM Committee
+                    </div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_regional"> Regional/County DRM
+                        Committee</div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_crossborder"> Cross-border
+                        Coordination Mechanism</div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_community"> Community Early Warning
+                        Groups</div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_technical"> Technical Working Groups
+                    </div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_none"> None established</div>
+                    <div class="checkbox-item"><input type="checkbox" name="struct_other"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">3. Level of Cross-border Collaboration</div>
+                <div class="likert-scale">
+                    <div class="likert-item">
+                        <input type="radio" name="collaboration" value="none">
+                        <label>None</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="collaboration" value="minimal">
+                        <label>Minimal</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="collaboration" value="moderate">
+                        <label>Moderate</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="collaboration" value="strong">
+                        <label>Strong</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="collaboration" value="very_strong">
+                        <label>Very Strong</label>
+                    </div>
+                </div>
+                <label>Describe collaboration activities:</label>
+                <textarea name="collaboration_desc"></textarea>
+            </div>
+
+            <div class="question">
+                <div class="question-number">4. Key Institutional Strengths (Check all that apply)</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Strong leadership commitment</div>
+                    <div class="checkbox-item"><input type="checkbox"> Dedicated DRM budget</div>
+                    <div class="checkbox-item"><input type="checkbox"> Trained personnel</div>
+                    <div class="checkbox-item"><input type="checkbox"> Good coordination mechanisms</div>
+                    <div class="checkbox-item"><input type="checkbox"> Community trust and engagement</div>
+                    <div class="checkbox-item"><input type="checkbox"> Access to technology/equipment</div>
+                    <div class="checkbox-item"><input type="checkbox"> Strong partnerships</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">5. Institutional Gaps/Challenges (Check all that apply)</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Insufficient funding</div>
+                    <div class="checkbox-item"><input type="checkbox"> Lack of trained staff</div>
+                    <div class="checkbox-item"><input type="checkbox"> Poor coordination</div>
+                    <div class="checkbox-item"><input type="checkbox"> Limited technology/equipment</div>
+                    <div class="checkbox-item"><input type="checkbox"> Weak policy framework</div>
+                    <div class="checkbox-item"><input type="checkbox"> Language barriers</div>
+                    <div class="checkbox-item"><input type="checkbox"> Political constraints</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <h2>Section 2: Hazard, Exposure, and Vulnerability Data</h2>
+
+            <div class="question">
+                <div class="question-number">6. Types of Hazards Affecting Your Area (Check all that apply)</div>
+                <div class="checkbox-group">
+                    <strong>Climate-related:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Drought</div>
+                    <div class="checkbox-item"><input type="checkbox"> Floods</div>
+                    <div class="checkbox-item"><input type="checkbox"> Extreme temperatures</div>
+                    <div class="checkbox-item"><input type="checkbox"> Strong winds/storms</div>
+
+                    <strong style="margin-top: 10px; display: block;">Conflict-related:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Resource-based conflicts</div>
+                    <div class="checkbox-item"><input type="checkbox"> Cross-border raids</div>
+                    <div class="checkbox-item"><input type="checkbox"> Political violence</div>
+
+                    <strong style="margin-top: 10px; display: block;">Health-related:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Disease outbreaks</div>
+                    <div class="checkbox-item"><input type="checkbox"> Malnutrition</div>
+                    <div class="checkbox-item"><input type="checkbox"> Zoonotic diseases</div>
+
+                    <strong style="margin-top: 10px; display: block;">Other:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Livestock diseases</div>
+                    <div class="checkbox-item"><input type="checkbox"> Crop pests</div>
+                    <div class="checkbox-item"><input type="checkbox"> Market shocks</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">7. Available Historical Data (Check all that apply)</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Hazard occurrence records</div>
+                    <div class="checkbox-item"><input type="checkbox"> Impact/damage assessments</div>
+                    <div class="checkbox-item"><input type="checkbox"> Vulnerability assessments</div>
+                    <div class="checkbox-item"><input type="checkbox"> Population/demographic data</div>
+                    <div class="checkbox-item"><input type="checkbox"> Infrastructure inventory</div>
+                    <div class="checkbox-item"><input type="checkbox"> Economic loss data</div>
+                    <div class="checkbox-item"><input type="checkbox"> No systematic data available</div>
+                </div>
+                <label>Data coverage period (years): <input type="text" style="width: 100px; display: inline;"></label>
+            </div>
+
+            <div class="question">
+                <div class="question-number">8. Data Collection and Sharing Methods</div>
+                <div class="checkbox-group">
+                    <strong>Collection methods:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Manual/paper-based</div>
+                    <div class="checkbox-item"><input type="checkbox"> Digital databases</div>
+                    <div class="checkbox-item"><input type="checkbox"> Mobile data collection</div>
+                    <div class="checkbox-item"><input type="checkbox"> Remote sensing/satellite</div>
+                    <div class="checkbox-item"><input type="checkbox"> Community reporting</div>
+
+                    <strong style="margin-top: 10px; display: block;">Sharing mechanisms:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Regular reports</div>
+                    <div class="checkbox-item"><input type="checkbox"> Online platforms</div>
+                    <div class="checkbox-item"><input type="checkbox"> Coordination meetings</div>
+                    <div class="checkbox-item"><input type="checkbox"> Email/WhatsApp groups</div>
+                    <div class="checkbox-item"><input type="checkbox"> No systematic sharing</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">9. Data Access Challenges (Check all that apply)</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Data not digitized</div>
+                    <div class="checkbox-item"><input type="checkbox"> Incompatible formats</div>
+                    <div class="checkbox-item"><input type="checkbox"> Restricted access/confidentiality</div>
+                    <div class="checkbox-item"><input type="checkbox"> Poor data quality</div>
+                    <div class="checkbox-item"><input type="checkbox"> Outdated information</div>
+                    <div class="checkbox-item"><input type="checkbox"> Language barriers</div>
+                    <div class="checkbox-item"><input type="checkbox"> Lack of data sharing protocols</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">10. Traditional/Indigenous Knowledge Systems</div>
+                <div class="radio-group">
+                    <div class="radio-item"><input type="radio" name="traditional" value="yes"> Yes, actively used</div>
+                    <div class="radio-item"><input type="radio" name="traditional" value="some"> Some practices exist
+                    </div>
+                    <div class="radio-item"><input type="radio" name="traditional" value="no"> No/Not aware</div>
+                </div>
+                <label>If yes, describe examples:</label>
+                <textarea name="traditional_examples"></textarea>
+            </div>
+
+            <div class="page-break"></div>
+
+            <h2>Section 3: Early Warning Systems and Communication</h2>
+
+            <div class="question">
+                <div class="question-number">11. Operational Early Warning Systems</div>
+                <div class="checkbox-group">
+                    <strong>Formal systems:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> National meteorological services</div>
+                    <div class="checkbox-item"><input type="checkbox"> Hydrological monitoring</div>
+                    <div class="checkbox-item"><input type="checkbox"> Disease surveillance</div>
+                    <div class="checkbox-item"><input type="checkbox"> Food security monitoring</div>
+                    <div class="checkbox-item"><input type="checkbox"> Conflict early warning</div>
+
+                    <strong style="margin-top: 10px; display: block;">Informal systems:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Community scouts/observers</div>
+                    <div class="checkbox-item"><input type="checkbox"> Traditional indicators</div>
+                    <div class="checkbox-item"><input type="checkbox"> Local radio networks</div>
+                    <div class="checkbox-item"><input type="checkbox"> Religious/cultural networks</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">12. Cross-border Communication Methods</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Official government channels</div>
+                    <div class="checkbox-item"><input type="checkbox"> Cross-border committees</div>
+                    <div class="checkbox-item"><input type="checkbox"> Radio broadcasts</div>
+                    <div class="checkbox-item"><input type="checkbox"> Mobile phones/SMS</div>
+                    <div class="checkbox-item"><input type="checkbox"> Community messengers</div>
+                    <div class="checkbox-item"><input type="checkbox"> Social media/WhatsApp</div>
+                    <div class="checkbox-item"><input type="checkbox"> Traditional methods (drums, flags)</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">13. Barriers to Early Warning Dissemination (Rate importance)</div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 8px;">Barrier</th>
+                        <th style="padding: 8px;">Not Important</th>
+                        <th style="padding: 8px;">Somewhat</th>
+                        <th style="padding: 8px;">Important</th>
+                        <th style="padding: 8px;">Very Important</th>
+                    </tr>
+                    <tr style="background: #f9f9f9;">
+                        <td style="padding: 8px;">Poor network coverage</td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_network" value="not"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_network" value="somewhat">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_network" value="important">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_network" value="very"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">Language barriers</td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_language" value="not"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_language" value="somewhat">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_language" value="important">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_language" value="very"></td>
+                    </tr>
+                    <tr style="background: #f9f9f9;">
+                        <td style="padding: 8px;">Lack of trust in information</td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_trust" value="not"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_trust" value="somewhat"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_trust" value="important"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_trust" value="very"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">Complex technical language</td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_technical" value="not"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_technical" value="somewhat">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_technical" value="important">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_technical" value="very"></td>
+                    </tr>
+                    <tr style="background: #f9f9f9;">
+                        <td style="padding: 8px;">Delayed information flow</td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_delayed" value="not"></td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_delayed" value="somewhat">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_delayed" value="important">
+                        </td>
+                        <td style="text-align: center;"><input type="radio" name="barrier_delayed" value="very"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="question">
+                <div class="question-number">14. Community Response to Early Warnings</div>
+                <div class="radio-group">
+                    <div class="radio-item"><input type="radio" name="response" value="excellent"> Excellent - immediate
+                        action</div>
+                    <div class="radio-item"><input type="radio" name="response" value="good"> Good - most take action
+                    </div>
+                    <div class="radio-item"><input type="radio" name="response" value="moderate"> Moderate - some action
+                    </div>
+                    <div class="radio-item"><input type="radio" name="response" value="poor"> Poor - limited action
+                    </div>
+                    <div class="radio-item"><input type="radio" name="response" value="very_poor"> Very poor - no action
+                    </div>
+                </div>
+                <label>Main gaps in preparedness actions:</label>
+                <textarea name="preparedness_gaps"></textarea>
+            </div>
+
+            <div class="question">
+                <div class="question-number">15. Communication Technologies in Use</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" name="tech_sms"> SMS alerts - Effectiveness:
+                        <input type="radio" name="eff_sms" value="poor">Poor <input type="radio" name="eff_sms"
+                            value="fair">Fair <input type="radio" name="eff_sms" value="good">Good <input type="radio"
+                            name="eff_sms" value="excellent">Excellent</div>
+                    <div class="checkbox-item"><input type="checkbox" name="tech_radio"> Radio broadcasts -
+                        Effectiveness: <input type="radio" name="eff_radio" value="poor">Poor <input type="radio"
+                            name="eff_radio" value="fair">Fair <input type="radio" name="eff_radio" value="good">Good
+                        <input type="radio" name="eff_radio" value="excellent">Excellent</div>
+                    <div class="checkbox-item"><input type="checkbox" name="tech_apps"> Mobile apps - Effectiveness:
+                        <input type="radio" name="eff_apps" value="poor">Poor <input type="radio" name="eff_apps"
+                            value="fair">Fair <input type="radio" name="eff_apps" value="good">Good <input type="radio"
+                            name="eff_apps" value="excellent">Excellent</div>
+                    <div class="checkbox-item"><input type="checkbox" name="tech_whatsapp"> WhatsApp groups -
+                        Effectiveness: <input type="radio" name="eff_whatsapp" value="poor">Poor <input type="radio"
+                            name="eff_whatsapp" value="fair">Fair <input type="radio" name="eff_whatsapp"
+                            value="good">Good <input type="radio" name="eff_whatsapp" value="excellent">Excellent</div>
+                    <div class="checkbox-item"><input type="checkbox" name="tech_meetings"> Community meetings -
+                        Effectiveness: <input type="radio" name="eff_meetings" value="poor">Poor <input type="radio"
+                            name="eff_meetings" value="fair">Fair <input type="radio" name="eff_meetings"
+                            value="good">Good <input type="radio" name="eff_meetings" value="excellent">Excellent</div>
+                    <div class="checkbox-item"><input type="checkbox" name="tech_loudspeakers"> Loudspeakers -
+                        Effectiveness: <input type="radio" name="eff_loudspeakers" value="poor">Poor <input type="radio"
+                            name="eff_loudspeakers" value="fair">Fair <input type="radio" name="eff_loudspeakers"
+                            value="good">Good <input type="radio" name="eff_loudspeakers" value="excellent">Excellent
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <h2>Section 4: Coping Capacity and Preparedness</h2>
+
+            <div class="question">
+                <div class="question-number">Impact of Climate-Related Hazards</div>
+                <div class="sub-question">How do climate related hazards affect communities and natural resources?</div>
+                <div class="checkbox-group">
+                    <strong>Community impacts:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Loss of lives</div>
+                    <div class="checkbox-item"><input type="checkbox"> Displacement/migration</div>
+                    <div class="checkbox-item"><input type="checkbox"> Loss of livelihoods</div>
+                    <div class="checkbox-item"><input type="checkbox"> Food insecurity</div>
+                    <div class="checkbox-item"><input type="checkbox"> Health problems</div>
+                    <div class="checkbox-item"><input type="checkbox"> Social conflicts</div>
+
+                    <strong style="margin-top: 10px; display: block;">Natural resource impacts:</strong>
+                    <div class="checkbox-item"><input type="checkbox"> Water scarcity</div>
+                    <div class="checkbox-item"><input type="checkbox"> Pasture degradation</div>
+                    <div class="checkbox-item"><input type="checkbox"> Soil erosion</div>
+                    <div class="checkbox-item"><input type="checkbox"> Deforestation</div>
+                    <div class="checkbox-item"><input type="checkbox"> Loss of biodiversity</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">16. Current Community Coping Mechanisms</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Livelihood diversification</div>
+                    <div class="checkbox-item"><input type="checkbox"> Migration/mobility</div>
+                    <div class="checkbox-item"><input type="checkbox"> Social support networks</div>
+                    <div class="checkbox-item"><input type="checkbox"> Traditional savings groups</div>
+                    <div class="checkbox-item"><input type="checkbox"> Sale of assets</div>
+                    <div class="checkbox-item"><input type="checkbox"> Reduced consumption</div>
+                    <div class="checkbox-item"><input type="checkbox"> Alternative income sources</div>
+                    <div class="checkbox-item"><input type="checkbox"> Community resource sharing</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">17. Effectiveness of Coping Capacities</div>
+                <div class="likert-scale">
+                    <div class="likert-item">
+                        <input type="radio" name="effectiveness" value="very_ineffective">
+                        <label>Very Ineffective</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="effectiveness" value="ineffective">
+                        <label>Ineffective</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="effectiveness" value="moderate">
+                        <label>Moderate</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="effectiveness" value="effective">
+                        <label>Effective</label>
+                    </div>
+                    <div class="likert-item">
+                        <input type="radio" name="effectiveness" value="very_effective">
+                        <label>Very Effective</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">Alternative Livelihoods Available</div>
+                <div class="sub-question">What alternative livelihoods are available?</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Small-scale trading</div>
+                    <div class="checkbox-item"><input type="checkbox"> Handicrafts/artisanal work</div>
+                    <div class="checkbox-item"><input type="checkbox"> Casual labor</div>
+                    <div class="checkbox-item"><input type="checkbox"> Beekeeping</div>
+                    <div class="checkbox-item"><input type="checkbox"> Fishing</div>
+                    <div class="checkbox-item"><input type="checkbox"> Tourism-related activities</div>
+                    <div class="checkbox-item"><input type="checkbox"> Value addition/processing</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">18. Key Capacity Gaps</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Limited technical knowledge</div>
+                    <div class="checkbox-item"><input type="checkbox"> Insufficient financial resources</div>
+                    <div class="checkbox-item"><input type="checkbox"> Poor organization/coordination</div>
+                    <div class="checkbox-item"><input type="checkbox"> Lack of equipment/tools</div>
+                    <div class="checkbox-item"><input type="checkbox"> Weak leadership</div>
+                    <div class="checkbox-item"><input type="checkbox"> Limited access to information</div>
+                    <div class="checkbox-item"><input type="checkbox"> Poor infrastructure</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">19. Training/Technical Support Needs (Rank top 5)</div>
+                <div style="display: grid; grid-template-columns: 50px 1fr; gap: 10px;">
+                    <div>Rank</div>
+                    <div>Area</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Risk assessment and mapping</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Early warning systems development</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Community mobilization</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Data collection and management</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Cross-border coordination</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Resource mobilization</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Climate change adaptation</div>
+                    <input type="text" style="width: 40px;">
+                    <div>Conflict-sensitive programming</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">20. Successful Cross-border Strategies</div>
+                <label>Describe any successful examples that could be scaled up:</label>
+                <textarea name="success_examples" rows="4"></textarea>
+            </div>
+
+            <div class="question">
+                <div class="question-number">Investment/Infrastructure Gaps</div>
+                <div class="sub-question">What investment/infrastructure gaps exist?</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Water infrastructure (boreholes, dams)</div>
+                    <div class="checkbox-item"><input type="checkbox"> Road networks</div>
+                    <div class="checkbox-item"><input type="checkbox"> Communication towers</div>
+                    <div class="checkbox-item"><input type="checkbox"> Health facilities</div>
+                    <div class="checkbox-item"><input type="checkbox"> Storage facilities</div>
+                    <div class="checkbox-item"><input type="checkbox"> Market infrastructure</div>
+                    <div class="checkbox-item"><input type="checkbox"> Emergency shelters</div>
+                    <div class="checkbox-item"><input type="checkbox"> Weather stations</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <h2>Section 5: Training and Capacity Building Needs</h2>
+
+            <div class="question">
+                <div class="question-number">21. Previous DRM/EWS Training Received</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Basic DRM concepts</div>
+                    <div class="checkbox-item"><input type="checkbox"> Risk assessment</div>
+                    <div class="checkbox-item"><input type="checkbox"> Early warning systems</div>
+                    <div class="checkbox-item"><input type="checkbox"> Community engagement</div>
+                    <div class="checkbox-item"><input type="checkbox"> Data management</div>
+                    <div class="checkbox-item"><input type="checkbox"> Cross-border coordination</div>
+                    <div class="checkbox-item"><input type="checkbox"> None</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other: <input type="text"
+                            style="width: 200px; display: inline;"></div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">22. Preferred Training Format</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> In-person workshops</div>
+                    <div class="checkbox-item"><input type="checkbox"> Online courses</div>
+                    <div class="checkbox-item"><input type="checkbox"> Blended learning</div>
+                    <div class="checkbox-item"><input type="checkbox"> Field-based training</div>
+                    <div class="checkbox-item"><input type="checkbox"> Peer-to-peer exchange</div>
+                    <div class="checkbox-item"><input type="checkbox"> On-the-job mentoring</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">23. Priority Training Topics</div>
+                <label>List your top 3 priority training needs:</label>
+                <div style="margin: 10px 0;">
+                    <label>1.</label>
+                    <input type="text" name="priority1">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>2.</label>
+                    <input type="text" name="priority2">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>3.</label>
+                    <input type="text" name="priority3">
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-number">24. Additional Comments/Recommendations</div>
+                <textarea name="additional_comments" rows="5"></textarea>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                <button type="submit" class="submit-btn no-print">Download as JSON</button>
+                <button type="button" class="submit-btn no-print" onclick="downloadAsCSV()"
+                    style="background-color: #27ae60;">Download as CSV</button>
+            </div>
+
+        </form>
+
+        <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
+            <p><strong>Thank you for completing this questionnaire!</strong></p>
+            <p>Your responses will help us design effective capacity-building programs for disaster risk management and
+                early warning systems in the cross-border regions.</p>
+            <p><em>Note: Downloaded files can be collected and compiled later for analysis.</em></p>
+        </div>
+    </div>
+</body>
+
+</html>
